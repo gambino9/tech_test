@@ -2,8 +2,6 @@ import os
 import csv
 import pandas as pd
 import numpy as np
-from collections import Counter
-import datetime
 
 # Parsing :
 # ASKED
@@ -44,20 +42,38 @@ def check_date_time_continuity(df):
         i += 1
 
 
-def check_values_range(df):
-    """
-    Checks if sentiment values are between 0 and 1
-    :param df: dataframe
-    :return:
-    """
-    print(all(df['sentiment_positive'].between(0, 1)))
-    print(all(df['sentiment_negative'].between(0, 1)))
-    print(all(df['emotion_joy'].between(0, 1)))
-    print(all(df['emotion_fear'].between(0, 1)))
+# def check_values_range(df):
+#     """
+#     Checks if sentiment values are between 0 and 1
+#     :param df: dataframe
+#     :return:
+#     """
+#     print(all(df['sentiment_positive'].between(0, 1)))
+#     print(all(df['sentiment_negative'].between(0, 1)))
+#     print(all(df['emotion_joy'].between(0, 1)))
+#     print(all(df['emotion_fear'].between(0, 1)))
+#
+#     # Remove rows containing sentiment values outside 0-1 range
+#     d1 = df[df['emotion_joy'].between(0, 1)]
+#     print(d1)
 
-    # Remove rows containing sentiment values outside 0-1 range
-    d1 = df[df['emotion_joy'].between(0, 1)]
-    print(d1)
+
+def check_outliers(df):
+    # inter quartile range method
+    q25, q75 = df['sentiment_negative'].quantile(0.25), df['sentiment_negative'].quantile(0.75)
+    iqr = q75 - q25
+    cut_off = iqr * 1.5
+    lower, upper = q25 - cut_off, q75 + cut_off
+    outliers = [x for x in df['sentiment_negative'] if x < lower or x > upper]
+    print(outliers)
+
+    # data_mean, data_std = np.mean(df['sentiment_negative']), np.std(df['sentiment_negative'])
+    # cut_off = data_std * 3  # 1.3
+    # lower, upper = data_mean - cut_off, data_mean + cut_off
+    #
+    # outliers = [x for x in df['sentiment_negative'] if x < lower or x > upper]
+    # print(outliers)
+
 
 
 def check_for_zero_values(df):
@@ -90,5 +106,6 @@ if __name__ == "__main__":
     # print(dataframe)
     # find_missing_lines(dataframe)
     # check_values_range(dataframe)
-    check_date_time_continuity(dataframe)
+    # check_date_time_continuity(dataframe)
     # check_for_zero_values(dataframe)
+    check_outliers(dataframe)
