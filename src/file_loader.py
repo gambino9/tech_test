@@ -5,6 +5,9 @@ import os
 
 
 class FileLoader:
+    """
+    The goal of this class is to load any CSV, Excel or Json file as a pandas Dataframe
+    """
     def __init__(self):
         pass
 
