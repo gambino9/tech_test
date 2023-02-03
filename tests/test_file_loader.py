@@ -52,14 +52,14 @@ class FileLoaderTest(unittest.TestCase):
         with self.assertRaises(FileNotFoundError):
             df = file_loader.load_file(fake_file)
 
-    def test_wrong_obj_raises_file_not_found_error(self):
+    def test_wrong_obj_raises_system_exit(self):
         """
-        Checks if wrong object passed to FileLoader raises a FileNotFoundError
+        Checks if wrong object passed to FileLoader raises a SystemExit
         """
         fake_file = None
         file_loader = FileLoader()
 
-        with self.assertRaises(FileNotFoundError):
+        with self.assertRaises(SystemExit):
             df = file_loader.load_file(fake_file)
 
 
