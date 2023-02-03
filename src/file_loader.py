@@ -1,3 +1,5 @@
+import sys
+
 import pandas as pd
 import os
 
@@ -15,10 +17,10 @@ class FileLoader:
             elif path.endswith("json"):
                 dataframe = pd.read_json(path, encoding='unicode_escape')
             else:
-                return None
+                raise FileNotFoundError
             return dataframe
-        except FileNotFoundError:
-            return None
+        except AttributeError as err:
+            sys.exit(err)
 
 
 if __name__ == "__main__":
