@@ -1,7 +1,5 @@
 import sys
-
 import pandas as pd
-import os
 
 
 class FileLoader:
@@ -24,13 +22,3 @@ class FileLoader:
             return dataframe
         except AttributeError as err:
             sys.exit(err)
-
-
-if __name__ == "__main__":
-    dirname = os.path.dirname(__file__)
-    # csv_file = os.path.join(dirname, '../resources/test_file (copie).csv')
-    # csv_file = os.path.join(dirname, '../resources/Test_file.xlsx')
-    csv_file = os.path.join(dirname, '../resources/epl_2022_2023_30_01_2023.json')
-    FileLoader = FileLoader()
-    df = FileLoader.load_file(csv_file)
-    print(df)
