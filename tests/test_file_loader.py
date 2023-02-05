@@ -11,7 +11,7 @@ class FileLoaderTest(unittest.TestCase):
         Checks that FileLoader class successfully loads CSV file into a pandas Dataframe
         """
         dirname = os.path.dirname(__file__)
-        csv_file = os.path.join(dirname, '../resources/test_file (copie).csv')
+        csv_file = os.path.join(dirname, '../resources/test_file_(copie).csv')
         file_loader = FileLoader()
         df = file_loader.load_file(csv_file)
 
