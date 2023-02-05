@@ -59,7 +59,7 @@ It will display errors and warning, and the details of the errors with metrics.
 
 ## Tests
 
-Some Unittests comes with the script. They are located in the [src file](tests) Here's how to launch them : 
+Some Unittests comes with the script. They are located in the [tests file](tests) Here's how to launch them : 
 
 `$ python -m unittest tests/test_file_loader.py`   
 or   
