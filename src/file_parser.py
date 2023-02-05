@@ -1,28 +1,25 @@
 import pandas as pd
 
 
-# Parsing :
-# ASKED
-# - Missing lines (non-contiguous time-series)      YES
-# - 0s in columns (warning instead of error)        YES
-# - Incoherent datas                                YES
-# OTHERS
-# - Check for N/A values (dropping the columns)     YES
-# - Warning when float is found in volume column ?  YES
-
-# ANALYSIS :
-# - At the end of each file processing, display some metrics about data distribution
-# that you think can be helpful to spot anomalies, like statistics for example.
+def calculate_percentage(part, total):
+    average = 100 * float(part) / float(total)
+    return average
 
 
 class FileParser:
     def __init__(self, df):
         self.df = df
 
-        self.nan_sentiment_values, self.nan_volume_values = self.find_missing_values()  # validity : no
-        self.date_time_continuity = self.check_date_time_continuity()  # validity : no
-        self.zeros_sentiment_values, self.zeros_volume_values = self.check_for_zero_values()  # validity : yes (warning)
-        self.float_volume_values = self.check_float_values_in_volume_column()  # validity : no
+        self.sentiment_columns = ["sentiment_positive", "sentiment_negative", "emotion_joy", "emotion_fear"]
+
+        self.date_time_continuity = self.check_date_time_continuity()
+        self.zeros_sentiment_values, self.zeros_volume_values = self.check_for_zero_values()
+        self.nb_outliers = (sum(len(self.check_outliers(x)) for x in self.sentiment_columns))
+        self.nan_sentiment_values, self.nan_volume_values = self.find_missing_values()
+        self.float_volume_values = self.check_float_values_in_volume_column()
+
+        self.warning = False
+        self.invalid = False
 
     def find_missing_values(self):
         """
@@ -33,14 +30,14 @@ class FileParser:
         """
         if any(self.df.isna()):
             nan_total = self.df.isna().sum()  # A dataset containing nb of NaN for each column
-            nan_sentiment_values = sum(nan_total[['sentiment_positive', 'sentiment_negative', 'emotion_joy', 'emotion_fear']])
+            nan_sentiment_values = sum(nan_total[self.sentiment_columns])
             nan_volume_values = nan_total['volume']
             return nan_sentiment_values, nan_volume_values
         return None, None
 
-    def check_date_time_continuity(self):  # Must tell how many missing lines are there
+    def check_date_time_continuity(self):
         """
-        Iterates through DatetimeIndex obj from Date column of dataset to check
+        Iterates through dataset to check
         datetime discontinuity on a daily increasing basis
 
         :return: Absolute value of missing days in dataset
@@ -65,31 +62,27 @@ class FileParser:
         """
         zeros_df = self.df.isin([0]).sum(axis=0)
         if sum(zeros_df):
-            zeros_sentiment_values = sum(zeros_df[['sentiment_positive', 'sentiment_negative', 'emotion_joy', 'emotion_fear']])
+            zeros_sentiment_values = sum(zeros_df[self.sentiment_columns])
             zeros_volume_values = zeros_df['volume']
             return zeros_sentiment_values, zeros_volume_values
         return None, None
 
-    def check_outliers(self, column_name):
+    def check_outliers(self, column_name, k_factor=0.5):
         """
         For a given column, checks for outliers values (values too far
         from the average) by applying the interquartile range method
+        :param: column_name : The column where to look for outliers
+                k_factor : The factor by which we multiply the interquartile range
+                to calculate the threshold. Default is set to 0.5 and can be adapted
         :return: List containing outliers values
         """
         # inter quartile range method
         q25, q75 = self.df[column_name].quantile(0.25), self.df[column_name].quantile(0.75)
         iqr = q75 - q25
-        cut_off = iqr * 0.5
+        cut_off = iqr * k_factor
         lower, upper = q25 - cut_off, q75 + cut_off
         outliers = [x for x in self.df[column_name] if x < lower or x > upper]
         return outliers
-
-        # data_mean, data_std = np.mean(df['sentiment_negative']), np.std(df['sentiment_negative'])
-        # cut_off = data_std * 3  # 1.3
-        # lower, upper = data_mean - cut_off, data_mean + cut_off
-        #
-        # outliers = [x for x in df['sentiment_negative'] if x < lower or x > upper]
-        # print(outliers)
 
     def check_float_values_in_volume_column(self):
         """
@@ -101,10 +94,44 @@ class FileParser:
             return float_values
         return None
 
-    def is_dataset_valid(self):
-        pass
+    def check_dataset_validity(self):
+        """
+        Prints if dataset is invalid or raises any warning
+        Calls 'print_file_analysis' function to print the file analysis
+        """
+        if any([self.zeros_volume_values, self.zeros_sentiment_values]):
+            self.warning = True
+            print(f"WARNING : The dataset contains zeros values")
+        if any([self.date_time_continuity, self.nb_outliers, self.nan_volume_values, self.nan_sentiment_values, self.float_volume_values]):
+            self.invalid = True
+            print(f"ERROR : The dataset is invalid")
+        print("\nPlease check the file analysis :\n")
+        self.print_file_analysis()
 
-    def print_csv_file_analysis(self):
-        pass
+    def print_file_analysis(self):
+        """
+        Prints file analysis if file has a warning, is invalid or if it is valid
+        """
+        rows = self.df.shape[0]
 
+        if self.warning:
+            zero_total = self.zeros_sentiment_values + self.zeros_volume_values
+            zero_stat = calculate_percentage(zero_total, rows)
+            print(
+                f"Percentage of zeros values : {zero_stat:.2f}% ({self.zeros_volume_values} in volume column and {self.zeros_sentiment_values} on sentiments columns)")
 
+        if self.invalid:
+            time_stat = calculate_percentage(self.date_time_continuity, rows)
+            print(f"Percentage of missing days : {time_stat:.2f}% ({self.date_time_continuity} days on {rows} rows)")
+
+            outliers_stat = calculate_percentage(self.nb_outliers, rows)
+            print(f"Percentage of outliers values : {outliers_stat:.2f}% (on a DataFrame of shape {self.df.shape})")
+
+            nan_total = self.nan_sentiment_values + self.nan_volume_values
+            nan_stat = calculate_percentage(nan_total, rows)
+            print(f"Percentage of NaN values : {nan_stat:.2f}% ({self.nan_volume_values} in volume column and {self.nan_sentiment_values} in sentiments columns)")
+
+            float_stat = calculate_percentage(self.float_volume_values, rows)
+            print(f"Percentage of float values in volume column : {float_stat:.2f}% ({self.float_volume_values} on 86 rows)")
+        else:
+            print("The dataset is valid")
