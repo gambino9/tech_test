@@ -12,7 +12,7 @@ class FileLoader:
     def load_file(self, path):
         try:
             if path.endswith("csv"):
-                dataframe = pd.read_csv(path)
+                dataframe = pd.read_csv(path, sep=';')
             elif path.endswith("xls") or path.endswith("xlsx"):
                 dataframe = pd.read_excel(path)
             elif path.endswith("json"):
