@@ -2,6 +2,8 @@ import pandas as pd
 
 
 def calculate_percentage(part, total):
+    if part is None:
+        return 0
     average = 100 * float(part) / float(total)
     return average
 
