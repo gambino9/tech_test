@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dataset Analysis</title>
+</head>
+<body>
+{% for sentence in text %}
+    <li>{{ sentence }}</li>
+    {% endfor %}
+<a href="{{url_for('index')}}" >Back to upload</a>
+</body>
+</html>
