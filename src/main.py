@@ -15,7 +15,8 @@ def main(file):
     dataframe = file_loader.load_file(file)
 
     file_parser = FileParser(dataframe)
-    file_parser.check_dataset_validity()
+    analysis = file_parser.print_file_analysis()
+    print(analysis)
 
 
 if __name__ == "__main__":

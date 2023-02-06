@@ -23,6 +23,10 @@ class FileParser:
         self.warning = False
         self.invalid = False
 
+        self.analysis = ""
+
+        self.check_dataset_validity()
+
     def find_missing_values(self):
         """
         Finds in the dataset all NaN (missing values) in the sentiments columns and
@@ -98,42 +102,43 @@ class FileParser:
 
     def check_dataset_validity(self):
         """
-        Prints if dataset is invalid or raises any warning
-        Calls 'print_file_analysis' function to print the file analysis
+        Fills bool values if the dataset is invalid or raises any warning
         """
         if any([self.zeros_volume_values, self.zeros_sentiment_values]):
             self.warning = True
-            print(f"WARNING : The dataset contains zeros values")
         if any([self.date_time_continuity, self.nb_outliers, self.nan_volume_values, self.nan_sentiment_values, self.float_volume_values]):
             self.invalid = True
-            print(f"ERROR : The dataset is invalid")
-        print("\nPlease check the file analysis :\n")
-        self.print_file_analysis()
 
-    def print_file_analysis(self):
+    def return_file_analysis(self):
         """
-        Prints file analysis if file has a warning, is invalid or if it is valid
+        File analysis if file has a warning, is invalid or if it is valid
+        :return : A concatenated string containing the file analysis
         """
         rows = self.df.shape[0]
 
         if self.warning:
+            self.analysis += f"WARNING : The dataset contains zeros values\n"
             zero_total = self.zeros_sentiment_values + self.zeros_volume_values
             zero_stat = calculate_percentage(zero_total, rows)
-            print(
-                f"Percentage of zeros values : {zero_stat:.2f}% ({self.zeros_volume_values} in volume column and {self.zeros_sentiment_values} on sentiments columns)")
+            self.analysis += f"Percentage of zeros values : {zero_stat:.2f}% ({self.zeros_volume_values} in volume column and {self.zeros_sentiment_values} on sentiments columns)\n"
 
         if self.invalid:
+            self.analysis += f"ERROR : The dataset is invalid\n"
+
+            self.analysis += "\nPlease check the file analysis :\n"
+
             time_stat = calculate_percentage(self.date_time_continuity, rows)
-            print(f"Percentage of missing days : {time_stat:.2f}% ({self.date_time_continuity} days on {rows} rows)")
+            self.analysis += f"Percentage of missing days : {time_stat:.2f}% ({self.date_time_continuity} days on {rows} rows)\n"
 
             outliers_stat = calculate_percentage(self.nb_outliers, rows)
-            print(f"Percentage of outliers values : {outliers_stat:.2f}% (on a DataFrame of shape {self.df.shape})")
+            self.analysis += f"Percentage of outliers values : {outliers_stat:.2f}% (on a DataFrame of shape {self.df.shape})\n"
 
             nan_total = self.nan_sentiment_values + self.nan_volume_values
             nan_stat = calculate_percentage(nan_total, rows)
-            print(f"Percentage of NaN values : {nan_stat:.2f}% ({self.nan_volume_values} in volume column and {self.nan_sentiment_values} in sentiments columns)")
+            self.analysis += f"Percentage of NaN values : {nan_stat:.2f}% ({self.nan_volume_values} in volume column and {self.nan_sentiment_values} in sentiments columns)\n"
 
             float_stat = calculate_percentage(self.float_volume_values, rows)
-            print(f"Percentage of float values in volume column : {float_stat:.2f}% ({self.float_volume_values} on 86 rows)")
+            self.analysis += f"Percentage of float values in volume column : {float_stat:.2f}% ({self.float_volume_values} on 86 rows)\n"
         else:
-            print("The dataset is valid")
+            self.analysis += "The dataset is valid\n"
+        return self.analysis
