@@ -12,19 +12,22 @@ $ source .venv/bin/activate
 
 `$ git clone <repo_link>`
 
-Do not forget to install the appropriate packages to run the project,
+Do not forget to install the appropriate dependencies to run the project,
 otherwise it won't work :  
 
 `$ pip install -r requirements.txt`
 
 ## Usage
 
+It is possible to launch the project as a CLI (command line interface) or as an app run with Flask.
+
+### CLI Usage
 A basic CLI help message display when launching `main.py` file with `--help` argument :
 
 ```commandline
-$ python src/main.py --help
+$ python src/main_cli.py --help
 
-Usage: main.py [OPTIONS] FILE
+Usage: main_cli.py [OPTIONS] FILE
 
   The script takes a file path to analyze a dataset and print results
 
@@ -56,6 +59,36 @@ Percentage of float values in volume column : 3.49% (3 on 86 rows)
 ```
 
 It will display errors and warning, and the details of the errors with metrics.
+
+### App usage
+
+A very basic implementation of an app with Flask (because of it light weight and simplicity).
+
+To run the app, launch the following command : 
+
+```commandline
+$ flask --app flaskr/app --debug run   
+ * Serving Flask app 'flaskr/app'   
+ * Debug mode: on   
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.   
+ * Running on http://127.0.0.1:5000   
+Press CTRL+C to quit   
+ * Restarting with stat   
+ * Debugger is active!   
+ * Debugger PIN: 359-829-358   
+```
+
+Visit http://127.0.0.1:5000/ in a browser, and you should see the following message :
+
+![The upload route](docs/upload_route.png)
+
+Then, you can choose a file and click on `upload`.
+
+An input looking like that should display : 
+
+![Display of analysis and redirect link](docs/analysis_display.png)
+
+To go back to uploading a file again, you can click on `Back to upload`
 
 ## Tests
 
