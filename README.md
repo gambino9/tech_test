@@ -41,7 +41,7 @@ The CLI script has one _required_ argument which is the path of the file to anal
 For example :
 
 ```commandline
-$ python src/main.py resources/test_file.csv
+$ python src/main_cli.py resources/test_file.csv
 ```
  The script will then print on the console the results :
  
